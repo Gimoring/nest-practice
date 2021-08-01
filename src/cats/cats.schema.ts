@@ -34,6 +34,18 @@ export class Cat extends Document {
   @Prop()
   @IsString()
   imgUrl: string;
+
+  readonly readOnlyData: { id: string; email: string; name: string };
 } // document  상속
 
 export const CatSchema = SchemaFactory.createForClass(Cat); // Cat 클래스를 스키마로 만들어줌.
+
+// mongoose Virtual Field
+// 실제로 db에 저장되진 않지만, 비즈니스 로직에 사용할 수 있도록 제공해주는 필드임.
+CatSchema.virtual('readOnlyData').get(function (this: Cat) {
+  return {
+    id: this.id,
+    email: this.email,
+    name: this.name,
+  };
+});
