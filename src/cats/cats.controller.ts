@@ -9,10 +9,17 @@ import {
   Patch,
   Post,
   Put,
+  Req,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Request } from 'express';
+import { AuthService } from 'src/auth/auth.service';
+import { LoginRequestDto } from 'src/auth/dto/login.request.dto';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { HttpExceptionFilter } from 'src/common/exceptions/http-exception.filter';
 import { SuccessInterceptor } from 'src/common/interceptors/success.interceptor';
 import { PositiveIntPipe } from 'src/pipes/positiveInt.pipe';
@@ -25,13 +32,17 @@ import { CatRequestDto } from './dto/cats.request.dto';
 @UseInterceptors(SuccessInterceptor)
 export class CatsController {
   // CatsController라는 소비자가 catsService라는 제품을 주입받음.
-  constructor(private readonly catsService: CatsService) {}
+  constructor(
+    private readonly catsService: CatsService,
+    private readonly authService: AuthService,
+  ) {}
 
   // cats/
   @ApiOperation({ summary: '현재 고양이 가져오기' }) // Swagger 이름 설정.
+  @UseGuards(JwtAuthGuard) // 인증처리 가드
   @Get()
-  getCurrentCat() {
-    return 'current cat';
+  getCurrentCat(@CurrentUser() cat) {
+    return cat.readOnlyData;
   }
 
   @ApiResponse({
@@ -51,18 +62,12 @@ export class CatsController {
 
   @ApiOperation({ summary: '로그인' }) // Swagger 이름 설정.
   @Post('login')
-  logIn() {
-    return 'login';
-  }
-
-  @ApiOperation({ summary: '로그아웃' }) // Swagger 이름 설정.
-  @Post('logout')
-  logOut() {
-    return 'logout';
+  logIn(@Body() data: LoginRequestDto) {
+    return this.authService.jwtLogIn(data);
   }
 
   @ApiOperation({ summary: '이미지 업로드' }) // Swagger 이름 설정.
-  @Post('upload/cats')
+  @Post('upload/')
   uploadCatImg() {
     return 'uploadImg';
   }

@@ -9,6 +9,18 @@ import { CatRequestDto } from './dto/cats.request.dto';
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+  async findCatByIdWithoutPassword(
+    catId: string,
+  ): Promise<CatRequestDto | null> {
+    const cat = await this.catModel.findById(catId).select('-password');
+    return cat;
+  }
+
+  async findCatByEmail(email: string): Promise<Cat | null> {
+    const cat = await this.catModel.findOne({ email });
+    return cat;
+  }
+
   // 이메일을 인자로 받아 데이터베이스에 있는지 체크.
   async existsByEmail(email: string): Promise<boolean> {
     const result = await this.catModel.exists({ email });

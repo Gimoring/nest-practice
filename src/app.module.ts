@@ -6,17 +6,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     CatsModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot(), // env 적용
     MongooseModule.forRoot(process.env.MONGODB_URI, {
       useNewUrlParser: true, //  mongodb url을 읽을 수 있도록 설정
       useUnifiedTopology: true, // 최신 mongodb 드라이버 엔진을 사용하도록 설정
       useCreateIndex: true, // 몽고db 인덱싱 한다는 의미
       useFindAndModify: false, // default true인데 true면 오류 뜸.
     }),
+    AuthModule,
   ], //모듈을 연결시켜줌.
   controllers: [AppController],
   providers: [AppService], //공급자
